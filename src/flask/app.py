@@ -1,5 +1,6 @@
 
 import ConfigParser  
+import logging
 from flask_sqlalchemy import SQLAlchemy
 from database import DB
 from flask import jsonify, request
@@ -17,20 +18,20 @@ def create_app():
     def add_header(response):
         return response
 
-    @app.errorhandler(400)
-    def bad_request(e):
-        logging.error(e)
-        return response_with(resp.BAD_REQUEST_400)
+    # @app.errorhandler(400)
+    # def bad_request(e):
+    #     logging.error(e)
+    #     return response_with(resp.BAD_REQUEST_400)
 
-    @app.errorhandler(500)
-    def server_error(e):
-        logging.error(e)
-        return response_with(resp.SERVER_ERROR_500)
+    # @app.errorhandler(500)
+    # def server_error(e):
+    #     logging.error(e)
+    #     return response_with(resp.SERVER_ERROR_500)
 
-    @app.errorhandler(404)
-    def not_found(e):
-        logging.error(e)
-        return response_with(resp.NOT_FOUND_HANDLER_404)
+    # @app.errorhandler(404)
+    # def not_found(e):
+    #     logging.error(e)
+    #     return response_with(resp.NOT_FOUND_HANDLER_404)
 
     @app.route("/api/spec")
     def spec():

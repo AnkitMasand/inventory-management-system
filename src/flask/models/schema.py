@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+# import datetime
+
 db = SQLAlchemy()
 
 # map models
@@ -41,7 +44,12 @@ class Item(db.Model):
     active = db.Column(db.Integer, nullable=False)
     fk_category_item = db.relationship('Category', backref='Item')
     fk_item_variant_id = db.relationship('Variant', backref='Item')
-    def __init__(self, name, active):
+    def __init__(self, companyId, branchId, code, name, brand, active):
+        self.companyId = companyId
+        self.branchId = branchId
+        self.code = code
+        self.name = name
+        self.brand = brand
         self.name = name
         self.active = active
     def __repr__(self):
@@ -62,13 +70,13 @@ class Brand(db.Model):
 class Variant(db.Model):
     __tablename__ = 'Variant'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(128), nullable=True)
+    name = db.Column(db.String(1024), nullable=False)
     itemId = db.Column(db.Integer, db.ForeignKey('Item.id'), nullable=False)
-    costPrice = db.Column(db.Float, primary_key=True)
-    sellingPrice = db.Column(db.Float, primary_key=True)
+    costPrice = db.Column(db.Float, nullable=False)
+    sellingPrice = db.Column(db.Float, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     branchId = db.Column(db.Integer, nullable=False)
-    active = db.Column(db.Integer, nullable=False)
+    active = db.Column(db.Integer, nullable=True)
     fk_variant_property = db.relationship('Property', backref='Variant')
 
     def __init__(self, name, itemId, costPrice, sellingPrice, quantity, branchId, active):
@@ -80,7 +88,7 @@ class Variant(db.Model):
         self.branchId = branchId
         self.active = active
     def __repr__(self):
-        return '<Item (%s, %s) >' % (self.itemId, self.name)
+        return '<Variant (%s, %d, %d, %d, %d, %d, %d) >' % (self.name, self.itemId, self.costPrice, self.sellingPrice, self.quantity, self.branchId, self.active)
 
 class Property(db.Model):
     __tablename__ = 'Property'
@@ -103,7 +111,11 @@ class PropertyType(db.Model):
     fk_property_type = db.relationship('Property', backref='PropertyType')
 
     def __init__(self, name, active):
+        self.name  = name
         self.active = active
+    def __getitem__(self, key):
+        return self.PropertyType[key]
+
     def __repr__(self):
         return '<PropertyType (%s) >' % (self.active)
 
@@ -120,7 +132,7 @@ class Category(db.Model):
 class CategoryType(db.Model):
     __tablename__ = 'CategoryType'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String(128), nullable=False)
     active = db.Column(db.Integer, nullable=False)
     fk_category_type_id = db.relationship('Category', backref='CategoryType')
     def __init__(self, active):
@@ -128,3 +140,27 @@ class CategoryType(db.Model):
     def __repr__(self):
         return '<CategoryType (%s) >' % (self.active)
 
+class Event(db.Model):
+    __tablename__ = 'Event'
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.Enum('item','variant'))
+    message = db.Column(db.String(2048), nullable = False)
+    userId = db.Column(db.Integer, nullable=False)
+    createdAt = db.Column(db.DateTime, default=datetime.utcnow(), nullable=False)
+    def __init__(self, type, message, userId):
+        self.type = type
+        self.message = message
+        self.userId = userId
+    def __repr__(self):
+        return '<Event (%s) >' % (self.message)
+
+class User(db.Model):
+    __tablename__ = 'User'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128), nullable=False)
+    active = db.Column(db.Integer, nullable=False)
+    def __init__(self, name):
+        self.type = type
+        self.name = name
+    def __repr__(self):
+        return '<userId (%s) >' % (self.name)
